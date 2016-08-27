@@ -1,0 +1,8 @@
+2016-08-25: Version 1.0.0
+
+This is the first version.
+
+It is a simplified fortune cookie generator inspired by the BSD one.
+The original fortune generator has some insignificant bugs, unnecessary
+features and an ugly code style.  I can't stand the old implementation,
+thus making this shiny new tool.  :-P
