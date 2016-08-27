@@ -42,17 +42,4 @@ static bool endsWith(char* buf, char* sfx)
     return len_buf >= len_sfx && !strcmp(&buf[len_buf-len_sfx], sfx);
 }
 
-static void rotate(char* buf, size_t len)
-{
-    if (!buf) return;
-    for (size_t i = 0; i < len; i++) {
-        unsigned char c = buf[i];
-        if ('A' <= c && c <= 'Z') {
-            buf[i] = 'A' + (c - 'A' + 13) % 26;
-        } else if ('a' <= c && c <= 'z') {
-            buf[i] = 'a' + (c - 'a' + 13) % 26;
-        }
-    }
-}
-
 #endif /* FORTUNE_STRING_H */

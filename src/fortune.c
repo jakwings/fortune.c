@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "fortune.h"
 #include "endian.h"
+#include "rotate.h"
 #include "string.h"
 #include "utils.h"
 
@@ -133,7 +134,7 @@ char* _(GetCookieFromFd)(int in, int idx, FortuneIndex index,
         return NULL;
     }
 
-    if (cookie && rotated) rotate(cookie, length);
+    if (cookie && rotated) _(Rotate)(cookie, length);
     return cookie;
 }
 
@@ -403,6 +404,7 @@ static void help(FILE* stream)
             "\n"
             "    --index [-h] [-d <char>] [-cxs] <input> [output]\n"
             "    --dump [-h] [-d <char>] [-cxs] <input> [output] [data]\n"
+            "    --rotate\n"
             "    --version\n"
             "    --help\n"
            );
@@ -424,6 +426,8 @@ int main(int argc, char** argv)
         done = _(CreateData)(argc - 1, argv + 1);
     } else if (argc > 1 && !strcmp("--dump", argv[1])) {
         done = _(DumpData)(argc - 1, argv + 1);
+    } else if (argc > 1 && !strcmp("--rotate", argv[1])) {
+        done = _(RotateData)(argc - 1, argv + 1);
     } else if (argc > 1 && !strcmp("--version", argv[1])) {
         showVersion(stdout);
         return EXIT_SUCCESS;

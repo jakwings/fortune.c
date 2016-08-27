@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "endian.h"
+#include "rotate.h"
 #include "string.h"
 #include "unstr.h"
 #include "utils.h"
@@ -91,7 +92,7 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
                 in_comment = buf[nbyte-1] != '\n';
                 if (length <= BUF_SIZE) buf[0] = buf[1] = delim2[0];
             }
-            if (no_rotate) rotate(buf, nbyte);
+            if (no_rotate) _(Rotate)(buf, nbyte);
             if (write(out, buf, nbyte) != nbyte) return false;
         }
         if (nbyte == -1) return false;
@@ -166,7 +167,13 @@ static bool getOptions(int* pargc, char*** pargv, FortuneHeader* opts)
     int c;
     while ((c = getopt(argc, argv, "d:cxsh")) != -1) {
         switch (c) {
-        case 'd': delim = *optarg; break;
+        case 'd':
+            delim = *optarg;
+            if (!(0x20 <= delim && delim <= 0x7F)) {
+                L_ERROR("Delimiter is not printable: 0x%02X\n", delim);
+                return false;
+            }
+            break;
         case 'c': flags |= FORTUNE_DATA_COMMENT; break;
         case 'x': flags |= FORTUNE_DATA_ROTATED; break;
         case 's': flags |= FORTUNE_OPT_SUMMARY; break;

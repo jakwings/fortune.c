@@ -169,7 +169,13 @@ static bool getOptions(int* pargc, char*** pargv, FortuneHeader* opts)
     int c;
     while ((c = getopt(argc, argv, "d:cxsh")) != -1) {
         switch (c) {
-        case 'd': delim = *optarg; break;
+        case 'd':
+            delim = *optarg;
+            if (!(0x20 <= delim && delim <= 0x7F)) {
+                L_ERROR("Delimiter is not printable: 0x%02X\n", delim);
+                return false;
+            }
+            break;
         case 'c': flags |= FORTUNE_DATA_COMMENT; break;
         case 'x': flags |= FORTUNE_DATA_ROTATED; break;
         case 's': flags |= FORTUNE_OPT_SUMMARY; break;

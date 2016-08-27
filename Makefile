@@ -1,4 +1,4 @@
-PROGRAMS = fortune str unstr
+PROGRAMS = fortune str unstr rotate
 BINS = $(PROGRAMS:%=bin/%)
 
 CFLAGS += -std=c99 -Oz -Iinclude
@@ -17,7 +17,7 @@ lib/%.a: obj/%.o
 	@mkdir -p lib
 	$(AR) rcu $@ $<
 
-bin/fortune: src/fortune.c lib/str.a lib/unstr.a
+bin/fortune: src/fortune.c lib/str.a lib/unstr.a lib/rotate.a
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -25,11 +25,17 @@ bin/str: src/str.c
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $<
 
-bin/unstr: src/unstr.c
+bin/unstr: src/unstr.c lib/rotate.a
+	@mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/rotate: src/rotate.c
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $<
 
 test: all
+	echo '幸運Cookie' | bin/fortune --rotate | grep '^幾遘Pbbxvr$$'
+	echo '幾遘Pbbxvr' | bin/fortune --rotate | grep '^幸運Cookie$$'
 	@rm -f test/cookies1.dat && \
 		bin/fortune --index -s test/cookies1 | grep ': 3$$'
 	@bin/fortune --dump -s test/cookies1 test/cookies1.txt && \
