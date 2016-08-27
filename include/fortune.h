@@ -6,7 +6,7 @@
 #include "data.h"
 
 /* X.Y.Z = major.minor.patch */
-#define FORTUNE_VERSION_X 1
+#define FORTUNE_VERSION_X 2
 #define FORTUNE_VERSION_Y 0
 #define FORTUNE_VERSION_Z 0
 
