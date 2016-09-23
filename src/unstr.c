@@ -74,23 +74,28 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
 
         char buf[BUF_SIZE+1];
         size_t length = 0;
+        size_t line_length = 0;
         bool in_comment = false;
         ssize_t nbyte = 0;
         while ((nbyte = fdgets(in, buf, BUF_SIZE)) > 0) {
             length += nbyte;
-            if (nbyte == 2 && buf[0] == delim && buf[1] == '\n') {
+            line_length += nbyte;
+            if (line_length <= BUF_SIZE /* near the previous newline */ &&
+                    nbyte == 2 && buf[0] == delim && buf[1] == '\n') {
                 if (write(out, delim2, sizeof(delim2)) != sizeof(delim2)) {
                     return false;
                 }
                 break;
             }
-            if (in_comment /* far from the previous delimiter */ ||
-                    (length <= BUF_SIZE /* near the previous delimiter */ &&
+            if (in_comment ||
+                    (line_length <= BUF_SIZE /* near the previous newline */ &&
                      nbyte >= 2 && buf[0] == delim && buf[1] == delim)) {
-                if (no_comment) continue;
                 in_comment = buf[nbyte-1] != '\n';
+                if (buf[nbyte-1] == '\n') line_length = 0;
+                if (no_comment) continue;
                 if (length <= BUF_SIZE) buf[0] = buf[1] = delim2[0];
             }
+            if (buf[nbyte-1] == '\n') line_length = 0;
             if (no_rotate) rotate(buf, nbyte);
             if (write(out, buf, nbyte) != nbyte) return false;
         }

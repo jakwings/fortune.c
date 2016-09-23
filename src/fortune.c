@@ -116,12 +116,24 @@ char* _(GetCookieFromFd)(int in, int idx, FortuneIndex index,
     bool rotated = header->flags & FORTUNE_DATA_ROTATED;
 
     char buf[BUF_SIZE+1];
+    size_t line_length = 0;
+    bool in_comment = false;
     ssize_t nbyte = 0;
     while ((nbyte = fdgets(in, buf, BUF_SIZE)) > 0) {
-        if (nbyte == 0 || (nbyte == 2 && buf[0] == delim && buf[1] == '\n') ||
-                (commented && nbyte >= 2 && length <= BUF_SIZE &&
-                 buf[0] == delim && buf[1] == delim)) {
+        line_length += nbyte;
+        if (line_length <= BUF_SIZE /* near the previous newline */ &&
+                nbyte == 2 && buf[0] == delim && buf[1] == '\n') {
             break;
+        }
+        if (commented) {
+            if (in_comment ||
+                    (line_length <= BUF_SIZE /* near the previous newline */ &&
+                     nbyte >= 2 && buf[0] == delim && buf[1] == delim)) {
+                in_comment = buf[nbyte-1] != '\n';
+                if (buf[nbyte-1] == '\n') line_length = 0;
+                continue;
+            }
+            if (buf[nbyte-1] == '\n') line_length = 0;
         }
         length += nbyte;
         FORTUNE_ALLOC(cookie, length + 1);
