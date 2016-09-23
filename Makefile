@@ -30,31 +30,25 @@ bin/unstr: src/unstr.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 test: all
-	@rm -f test/cookies1.dat && \
-		bin/fortune --index -s test/cookies1 | grep ': 3$$'
-	@bin/fortune --dump -s test/cookies1 test/cookies1.txt && \
+	bin/fortune --index -s test/cookies1 | grep ': 3$$'
+	bin/fortune --dump -s test/cookies1 test/cookies1.txt && \
 		diff -qs test/cookies1{,.txt}
-	@rm -f test/cookies2.dat && \
-		bin/fortune --index -s test/cookies2 test/cookies2.dat | grep ': 5$$'
-	@bin/fortune --dump -s test/cookies2 test/cookies2.txt && \
+	bin/fortune --index -s test/cookies2 test/cookies2.dat | grep ': 5$$'
+	bin/fortune --dump -s test/cookies2 test/cookies2.txt && \
 		! diff -qs test/cookies2{,.txt}
-	@rm -f test/cookies1.dat && \
-		bin/fortune --index -cs test/cookies1 | grep ': 2$$'
-	@bin/fortune --dump -s test/cookies1 test/cookies1.txt && \
+	bin/fortune --index -cs test/cookies1 | grep ': 2$$'
+	bin/fortune --dump -s test/cookies1 test/cookies1.txt && \
 		! diff -qs test/cookies1{,.txt}
-	@rm -f test/cookies2.dat && \
-		bin/fortune --index -cs test/cookies2 | grep ': 2$$'
-	@bin/fortune --dump -s test/cookies2 test/cookies2.txt && \
+	bin/fortune --index -cs test/cookies2 | grep ': 2$$'
+	bin/fortune --dump -s test/cookies2 test/cookies2.txt && \
 		! diff -qs test/cookies2{,.txt}
-	@rm -f test/cookies3.dat && \
-		bin/fortune --index -xs test/cookies3 | grep ': 3$$'
-	@bin/fortune --dump -xs test/cookies3 test/cookies3.txt && \
+	bin/fortune --index -xs test/cookies3 | grep ': 3$$'
+	bin/fortune --dump -xs test/cookies3 test/cookies3.txt && \
 		diff -qs test/cookies1 test/cookies3.txt
-	@rm -f test/cookies3.dat && \
-		bin/fortune --index -cxs test/cookies3 | grep ': 2$$'
-	@bin/fortune --dump -cxs test/cookies3 test/cookies3.txt && \
+	bin/fortune --index -cxs test/cookies3 | grep ': 2$$'
+	bin/fortune --dump -cxs test/cookies3 test/cookies3.txt && \
 		! diff -qs test/cookies1 test/cookies3.txt
-	@rm -f test/*.* && \
+	rm -f test/*.* && \
 		for f in test/*; do ./bin/fortune --index -c $$f; done && \
 		bin/fortune test
 
