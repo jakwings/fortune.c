@@ -202,7 +202,7 @@ static void help(FILE* stream) {
             "    -h       Show this manual.\n"
             "    -d char  Change the delimiter of data to <char>.\n"
             "    -c       Remove comments.\n"
-            "    -x       Rotated each letter by 13 places if it was rotated.\n"
+            "    -x       Rotate each letter by 13 places if it was rotated.\n"
             "    -s       Print a summary.\n"
             "\n"
             "    The file name '-' represents standard input or output.\n"
