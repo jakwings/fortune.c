@@ -54,7 +54,7 @@ typedef uint64_t FortuneIndex;
  |   |%
  |   |This is just another fortune cookie.
  |
- | * Both empty cookies, or ones that contain
+ | * Both empty cookies and ones that contain
  |   only comments will not be indexed.  E.g.
  |
  |   |This is the first cookie.
