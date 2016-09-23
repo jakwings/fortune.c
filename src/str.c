@@ -58,32 +58,37 @@ bool _(CreateDataFromFd)(int in, int out, FortuneHeader* header)
     FortuneIndex* index = NULL;
     off_t last_pos = seekable_in ? lseek(in, 0, SEEK_CUR) : 0;
     size_t length = 0;
-    size_t comment = 0;
+    size_t line_length = 0;
+    size_t comment_length = 0;
     bool in_comment = false;
     char buf[BUF_SIZE+1];
     ssize_t nbyte = 0;
     while ((nbyte = fdgets(in, buf, BUF_SIZE)) >= 0) {
         length += nbyte;
-        if (nbyte == 0 || (nbyte == 2 && buf[0] == delim && buf[1] == '\n')) {
+        line_length += nbyte;
+        if (nbyte == 0 ||
+                (line_length <= BUF_SIZE /* near the previous newline */ &&
+                 nbyte == 2 && buf[0] == delim && buf[1] == '\n')) {
             off_t pos = last_pos + length;
-            length = length - nbyte - comment;
+            length = length - nbyte - comment_length;
             if (0 < length && length < FORTUNE_DATA_MAX_LENGTH) {
                 if (!push(&index, ++num_idx, last_pos, out, seekable_out)) {
                     goto FAIL;
                 }
             }
             last_pos = pos;
-            length = 0;
-            comment = in_comment = 0;
+            length = line_length = comment_length = 0;
+            in_comment = false;
         } else if (commented) {
-            if (in_comment /* far from the previous delimiter */ ||
-                    (length <= BUF_SIZE /* near the previous delimiter */ &&
+            if (in_comment ||
+                    (line_length <= BUF_SIZE /* near the previous newline */ &&
                      nbyte >= 2 && buf[0] == delim && buf[1] == delim)) {
-                comment += nbyte;
+                comment_length += nbyte;
                 in_comment = buf[nbyte-1] != '\n';
             }
         }
         if (nbyte == 0) break;
+        if (buf[nbyte-1] == '\n') line_length = 0;
     }
     if (nbyte == -1) goto FAIL;
 
