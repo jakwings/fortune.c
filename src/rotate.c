@@ -49,10 +49,11 @@ static int skip(unsigned char* p, int m, int n)
             ((0xE1 == p[0] && 0xA0 == p[1] && S1(0x8B, 0x8F, p[2])) ||
              (0xE2 == p[0] && 0x80 == p[1] && S1(0x80, 0x8F, p[2])) ||
              (0xE2 == p[0] && 0x80 == p[1] && S1(0xA8, 0xAF, p[2])) ||
-             (0xE2 == p[0] && 0x81 == p[1] && S1(0xA0, 0xAF, p[2])) ||
+             (0xE2 == p[0] && 0x81 == p[1] && S1(0x9F, 0xAF, p[2])) ||
              (0xE3 == p[0] && 0x80 == p[1] && 0x80 == p[2]) ||
              (0xEE == p[0] && S1(0x80, 0xBF, p[1]) && S1(0x80, 0xBF, p[2])) ||
              (0xEF == p[0] && S1(0x80, 0xA3, p[1]) && S1(0x80, 0xBF, p[2])) ||
+             (0xEF == p[0] && 0xB7 == p[1] && S1(0x90, 0xAF, p[2])) ||
              (0xEF == p[0] && 0xB8 == p[1] && S1(0x80, 0x8F, p[2])) ||
              (0xEF == p[0] && 0xBC == p[1] && 0x80 == p[2]) ||
              (0xEF == p[0] && 0xBF == p[1] && S1(0xB0, 0xBF, p[2])))) {
@@ -121,8 +122,8 @@ char* _(Rotate)(char* s, size_t n)
                     p[2] = rotate(0xB0, 0xBF, p[2]);  /* even */
                     i += 2; continue;
                 }
-                if (0xE2 == p[0] && 0x81 == p[1] && S1(0x80, 0x9F, p[2])) {
-                    p[2] = rotate(0x80, 0x9F, p[2]);  /* even */
+                if (0xE2 == p[0] && 0x81 == p[1] && S1(0x80, 0x9E, p[2])) {
+                    p[2] = rotate(0x80, 0x9E, p[2]);  /* odd */
                     i += 2; continue;
                 }
                 if (0xE2 == p[0] && 0x81 == p[1] && S1(0xB0, 0xBF, p[2])) {
@@ -131,6 +132,14 @@ char* _(Rotate)(char* s, size_t n)
                 }
                 if (0xE3 == p[0] && 0x80 == p[1] && S1(0x81, 0xBF, p[2])) {
                     p[2] = rotate(0x81, 0xBF, p[2]);  /* odd */
+                    i += 2; continue;
+                }
+                if (0xEF == p[0] && 0xB7 == p[1] && S1(0x80, 0x8F, p[2])) {
+                    p[2] = rotate(0x80, 0x8F, p[2]);  /* even */
+                    i += 2; continue;
+                }
+                if (0xEF == p[0] && 0xB7 == p[1] && S1(0xB0, 0xBF, p[2])) {
+                    p[2] = rotate(0xB0, 0xBF, p[2]);  /* even */
                     i += 2; continue;
                 }
                 if (0xEF == p[0] && 0xB8 == p[1] && S1(0x90, 0xBF, p[2])) {
