@@ -57,6 +57,8 @@ static int skip(unsigned char* p, int m, int n)
              (0xE2 == p[0] && 0x81 == p[1] && S1(0x9F, 0xAF, p[2])) ||
              /* U+3000 */
              (0xE3 == p[0] && 0x80 == p[1] && 0x80 == p[2]) ||
+             /* U+D800-DFFF */
+             (0xED == p[0] && S1(0xA0, 0xBF, p[1]) && S1(0x80, 0xBF, p[2])) ||
              /* U+E000-EFFF */
              (0xEE == p[0] && S1(0x80, 0xBF, p[1]) && S1(0x80, 0xBF, p[2])) ||
              /* U+F000-F8FF */
@@ -65,6 +67,8 @@ static int skip(unsigned char* p, int m, int n)
              (0xEF == p[0] && 0xB7 == p[1] && S1(0x90, 0xAF, p[2])) ||
              /* U+FE00-FE0F */
              (0xEF == p[0] && 0xB8 == p[1] && S1(0x80, 0x8F, p[2])) ||
+             /* U+FEFF */
+             (0xEF == p[0] && 0xBB == p[1] && 0xBF == p[2]) ||
              /* U+FF00 */
              (0xEF == p[0] && 0xBC == p[1] && 0x80 == p[2]) ||
              /* U+FFF0-FFFF */
@@ -72,8 +76,13 @@ static int skip(unsigned char* p, int m, int n)
         return 2;
     }
     if (m + 3 < n &&
+             /* U+01BC9D */
+            ((0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] && 0x9D == p[3]) ||
+             /* U+01BCA0-01BCAF */
+             (0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] &&
+              S1(0xA0, 0xAF, p[3])) ||
              /* U+0E0000-0FFFFF */
-            ((0xF3 == p[0] && S1(0xA0, 0xBF, p[1]) &&
+             (0xF3 == p[0] && S1(0xA0, 0xBF, p[1]) &&
               S1(0x80, 0xBF, p[2]) && S1(0x80, 0xBF, p[3])) ||
              /* U+100000-10FFFF */
              (0xF4 == p[0] && S1(0x80, 0x8F, p[1]) &&
@@ -147,6 +156,10 @@ char* _(Rotate)(char* s, size_t n)
                     p[2] = rotate(0x81, 0xBF, p[2]);  /* odd */
                     i += 2; continue;
                 }
+                if (0xED == p[0] && S1(0x80, 0x9F, p[1]) && S1(0x80, 0xBF, p[2])) {
+                    p[2] = rotate(0x80, 0xBF, p[2]);  /* even */
+                    i += 2; continue;
+                }
                 if (0xEF == p[0] && 0xB7 == p[1] && S1(0x80, 0x8F, p[2])) {
                     p[2] = rotate(0x80, 0x8F, p[2]);  /* even */
                     i += 2; continue;
@@ -159,6 +172,10 @@ char* _(Rotate)(char* s, size_t n)
                     p[2] = rotate(0x90, 0xBF, p[2]);  /* even */
                     i += 2; continue;
                 }
+                if (0xEF == p[0] && 0xBB == p[1] && S1(0x80, 0xBE, p[2])) {
+                    p[2] = rotate(0x80, 0xBE, p[2]);  /* odd */
+                    i += 2; continue;
+                }
                 if (0xEF == p[0] && 0xBC == p[1] && S1(0x81, 0xBF, p[2])) {
                     p[2] = rotate(0x81, 0xBF, p[2]);  /* odd */
                     i += 2; continue;
@@ -166,6 +183,23 @@ char* _(Rotate)(char* s, size_t n)
                 if (0xEF == p[0] && 0xBF == p[1] && S1(0x80, 0xAF, p[2])) {
                     p[2] = rotate(0x80, 0xAF, p[2]);  /* even */
                     i += 2; continue;
+                }
+            }
+            if (i + 3 < n) {
+                if (0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] &&
+                        S1(0x80, 0x9C, p[3])) {
+                    p[3] = rotate(0x80, 0x9C, p[3]);  /* odd */
+                    i += 3; continue;
+                }
+                if (0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] &&
+                        S1(0x9E, 0x9F, p[3])) {
+                    p[3] = rotate(0x9E, 0x9F, p[3]);  /* even */
+                    i += 3; continue;
+                }
+                if (0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] &&
+                        S1(0xB0, 0xBF, p[3])) {
+                    p[3] = rotate(0xB0, 0xBF, p[3]);  /* even */
+                    i += 3; continue;
                 }
             }
 
