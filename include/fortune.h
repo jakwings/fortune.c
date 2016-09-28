@@ -8,7 +8,7 @@
 /* X.Y.Z = major.minor.patch */
 #define FORTUNE_VERSION_X 2
 #define FORTUNE_VERSION_Y 0
-#define FORTUNE_VERSION_Z 1
+#define FORTUNE_VERSION_Z 2
 
 #ifndef FORTUNE_DATA_DIR
 #define FORTUNE_DATA_DIR "/usr/share/fortune"

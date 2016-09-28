@@ -1,3 +1,8 @@
+2016-09-28: Version 2.0.2
+
+Fix skip ranges for the rotation method.
+
+
 2016-09-23: Version 2.0.1
 
 Fix some logic about delimiters and comments in cookie source.
