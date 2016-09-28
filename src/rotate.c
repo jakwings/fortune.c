@@ -44,24 +44,38 @@ bool _(RotateData)(int argc, char** argv)
 
 static int skip(unsigned char* p, int m, int n)
 {
+    /* U+80-9F */
     if (m + 1 < n && 0xC2 == p[0] && S1(0x80, 0xA0, p[1])) return 1;
     if (m + 2 < n &&
+             /* U+180B-180F */
             ((0xE1 == p[0] && 0xA0 == p[1] && S1(0x8B, 0x8F, p[2])) ||
+             /* U+2000-200F */
              (0xE2 == p[0] && 0x80 == p[1] && S1(0x80, 0x8F, p[2])) ||
+             /* U+2028-202F */
              (0xE2 == p[0] && 0x80 == p[1] && S1(0xA8, 0xAF, p[2])) ||
+             /* U+205F-206F */
              (0xE2 == p[0] && 0x81 == p[1] && S1(0x9F, 0xAF, p[2])) ||
+             /* U+3000 */
              (0xE3 == p[0] && 0x80 == p[1] && 0x80 == p[2]) ||
+             /* U+E000-EFFF */
              (0xEE == p[0] && S1(0x80, 0xBF, p[1]) && S1(0x80, 0xBF, p[2])) ||
+             /* U+F000-F8FF */
              (0xEF == p[0] && S1(0x80, 0xA3, p[1]) && S1(0x80, 0xBF, p[2])) ||
+             /* U+FDD0-FDEF */
              (0xEF == p[0] && 0xB7 == p[1] && S1(0x90, 0xAF, p[2])) ||
+             /* U+FE00-FE0F */
              (0xEF == p[0] && 0xB8 == p[1] && S1(0x80, 0x8F, p[2])) ||
+             /* U+FF00 */
              (0xEF == p[0] && 0xBC == p[1] && 0x80 == p[2]) ||
+             /* U+FFF0-FFFF */
              (0xEF == p[0] && 0xBF == p[1] && S1(0xB0, 0xBF, p[2])))) {
         return 2;
     }
     if (m + 3 < n &&
+             /* U+0E0000-0FFFFF */
             ((0xF3 == p[0] && S1(0xA0, 0xBF, p[1]) &&
               S1(0x80, 0xBF, p[2]) && S1(0x80, 0xBF, p[3])) ||
+             /* U+100000-10FFFF */
              (0xF4 == p[0] && S1(0x80, 0x8F, p[1]) &&
               S1(0x80, 0xBF, p[2]) && S1(0x80, 0xBF, p[3])))) {
         return 3;
@@ -72,12 +86,11 @@ static int skip(unsigned char* p, int m, int n)
 static unsigned char rotate(size_t s, size_t e, unsigned char c)
 {
     size_t n = e - s + 1;
-    size_t q = n / 26;
     size_t r = n % 26;
     size_t i = c - s + 1;
     size_t k = s + 26 * (i / 26 - (i % 26 == 0));
     /* |A-Z|A-Z|?-?|A-Z|... */
-    if (c - s < n - r) return k + (c - k + 13) % 26;
+    if (c - s + 1 <= n - r) return k + (c - k + 13) % 26;
     /* |A-Z|A-Z|...|A-?| */
     if (r % 2 == 0) return k + (c - k + r / 2) % r;
     if (c != e) return k + (c - k + (r - 1) / 2) % (r - 1);
