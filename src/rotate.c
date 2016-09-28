@@ -44,7 +44,7 @@ bool _(RotateData)(int argc, char** argv)
 
 static int skip(unsigned char* p, int m, int n)
 {
-    /* U+80-9F */
+    /* U+80-A0 */
     if (m + 1 < n && 0xC2 == p[0] && S1(0x80, 0xA0, p[1])) return 1;
     if (m + 2 < n &&
              /* U+180B-180F */
