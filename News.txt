@@ -1,3 +1,10 @@
+2016-09-28: Version 2.0.3
+
+Fix skip ranges for the rotation method.
+
+Should we skip combining characters?
+
+
 2016-09-28: Version 2.0.2
 
 Fix skip ranges for the rotation method.
