@@ -1,3 +1,8 @@
+2017-03-07: Version 2.0.4
+
+Small fix.
+
+
 2016-09-28: Version 2.0.3
 
 Fix skip ranges for the rotation method.
