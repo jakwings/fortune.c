@@ -2,6 +2,7 @@
 #define FORTUNE_STRING_H 1
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,7 +37,7 @@ static char* joinPath(char* base, char* name)
 
 static bool endsWith(char* buf, char* sfx)
 {
-    if (!(buf && sfx)) return NULL;
+    if (!(buf && sfx)) return false;
     size_t len_buf = strlen(buf);
     size_t len_sfx = strlen(sfx);
     return len_buf >= len_sfx && !strcmp(&buf[len_buf-len_sfx], sfx);
