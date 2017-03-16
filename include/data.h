@@ -24,6 +24,7 @@
  | =
  *--------------------------------------------*/
 
+#pragma pack(1)
 typedef struct {
     /* big-endian */
     uint16_t version;
@@ -31,6 +32,7 @@ typedef struct {
     char delim;
     uint32_t total;
 } FortuneHeader;
+#pragma pack()
 
 /* big-endian */
 typedef uint64_t FortuneIndex;
