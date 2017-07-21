@@ -157,7 +157,7 @@ static bool push(FortuneIndex** idx, uint32_t len, off_t pos, int fd, bool dump)
         FortuneIndex pos_be = htobe64(pos);
         return write(fd, &pos_be, sizeof(pos_be)) == sizeof(pos_be);
     } else {
-        FORTUNE_ALLOC(*idx, len);
+        FORTUNE_ALLOC(*idx, len + 1);
         (*idx)[len] = pos;
         return true;
     }

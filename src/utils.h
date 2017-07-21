@@ -22,12 +22,12 @@
 #define CHUNK_SIZE 512
 
 #define FORTUNE_ALLOC(buf, size) do { \
-    if ((size) <= 0) break; \
-    if ((buf) == NULL) { \
-        buf = malloc(sizeof(*(buf)) * CHUNK_SIZE); \
-    } else if (((size) + 1) % CHUNK_SIZE == 0) { \
-        buf = realloc(buf, sizeof(*(buf)) * ((size) + CHUNK_SIZE)); \
+    if ((size) <= 0) { \
+        L_ERROR("Requested memeory size <= 0\n"); \
+        exit(EXIT_FAILURE); \
     } \
+    buf = realloc(buf, \
+                  sizeof(*(buf)) * (((size) / CHUNK_SIZE + 1) * CHUNK_SIZE)); \
     if ((buf) == NULL) { \
         perror("Memory limit exceeded"); \
         exit(EXIT_FAILURE); \
