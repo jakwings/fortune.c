@@ -310,7 +310,7 @@ static bool readPercent(char* buf, int* percent)
     int n = 0;
     char* p = buf;
     while ('0' <= *p && *p <= '9') n = *(p++) - '0' + n * 10;
-    if (!(*p == '%' && *(p+1) == '\0')) return false;
+    if (!(*p == '%' && *(p+1) == '\0') || n < 0) return false;
     *percent = n;
     return true;
 }
@@ -324,7 +324,7 @@ static FileList* gatherFiles(int argc, char** argv)
             int percent = -1;
             if (endsWith(argv[i], "%")) {
                 if (!readPercent(argv[i], &percent)) {
-                    L_ERROR("Non-integral percent number: %s\n", argv[i]);
+                    L_ERROR("Invalid percent number: %s\n", argv[i]);
                     return NULL;
                 }
                 if (i + 1 >= argc) {
