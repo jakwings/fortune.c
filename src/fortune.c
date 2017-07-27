@@ -77,16 +77,21 @@ bool _(PrintCookie)(int argc, char** argv)
         return false;
     }
 
-    uint32_t index = random() % file->header.total;
-    char* cookie = _(GetCookieFromPath)(file->path, file->data, index,
-            &(file->header));
-    freeFileList(files);
-    if (cookie) {
-        printf("%s", cookie);
-        FORTUNE_FREE(cookie);
-        return true;
+    if (file->header.total > 0) {
+        uint32_t index = random() % file->header.total;
+        char* cookie = _(GetCookieFromPath)(file->path, file->data, index,
+                &(file->header));
+        freeFileList(files);
+        if (cookie) {
+            printf("%s", cookie);
+            FORTUNE_FREE(cookie);
+            return true;
+        } else {
+            L_ERROR("Failed to fetch cookies from: %s\n", file->path);
+            return false;
+        }
     } else {
-        L_ERROR("Failed to fetch cookies from: %s\n", file->path);
+        L_ERROR("No cookie found in: %s\n", file->path);
         return false;
     }
 }
