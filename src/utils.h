@@ -40,7 +40,7 @@
 } while (0)
 
 /*
- * Reads at most (count - 1) bytes into buf, and terminate it will NUL.
+ * Reads at most (count - 1) bytes into buf, and terminate it with NUL.
  * Stop reading whenever an EOF occurs or a newline is read.
  * Return number of bytes read on success, or -1 on failure.
  */
