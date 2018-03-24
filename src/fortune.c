@@ -36,6 +36,7 @@ static FileList* addFile(FileList*, char* path, float percent);
 static FileList* addFolder(FileList*, char* path, float percent);
 static bool distributeProbability(FileList*, bool equiprobable);
 static void freeFileList(FileList*);
+static bool isIndexFilepath(char* path);
 static bool isFile(char* path);
 static bool isFolder(char* path);
 static bool readPercent(char* buf, int* percent);
@@ -208,6 +209,13 @@ static void freeFileList(FileList* files)
     }
 }
 
+static bool isIndexFilepath(char* path)
+{
+    size_t len = strlen(path);
+    if (len < 4) return false;
+    return !strcmp(".dat", path + (len - 4));
+}
+
 static bool isFile(char* path)
 {
     struct stat buf;
@@ -233,6 +241,9 @@ static FileList* addFile(FileList* files, char* path, float percent)
 {
     if (!isFile(path)) {
         P_ERROR("Cannot find file \"%s\"", path);
+        return NULL;
+    }
+    if (isIndexFilepath(path)) {
         return NULL;
     }
     FileList* file = newFile();
@@ -336,6 +347,9 @@ static FileList* gatherFiles(int argc, char** argv)
                     return NULL;
                 }
                 i++;
+            }
+            if (isIndexFilepath(argv[i])) {
+                L_ERROR("Index file not allowed as source file: %s\n", argv[i]);
             }
             if (isFile(argv[i])) {
                 tail = addFile(tail, argv[i], percent);
