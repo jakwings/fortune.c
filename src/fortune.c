@@ -141,6 +141,7 @@ char* _(GetCookieFromFd)(int in, int idx, FortuneIndex index,
             }
             if (buf[nbyte-1] == '\n') line_length = 0;
         }
+        if (buf[nbyte-1] == '\n') line_length = 0;
         length += nbyte;
         FORTUNE_ALLOC(cookie, length + 1);
         memcpy(cookie + length - nbyte, buf, nbyte);
