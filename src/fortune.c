@@ -140,7 +140,6 @@ char* _(GetCookieFromFd)(int in, int idx, FortuneIndex index,
                 if (buf[nbyte-1] == '\n') line_length = 0;
                 continue;
             }
-            if (buf[nbyte-1] == '\n') line_length = 0;
         }
         if (buf[nbyte-1] == '\n') line_length = 0;
         length += nbyte;
