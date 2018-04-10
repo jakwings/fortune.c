@@ -246,19 +246,21 @@ static FileList* addFile(FileList* files, char* path, float percent)
     if (isIndexFilepath(path)) {
         return NULL;
     }
+
+    char* data_path = addSuffix(path, ".dat");
+    assert(data_path);
+    if (!isFile(data_path)) {
+        free(data_path);
+        return NULL;
+    }
+
     FileList* file = newFile();
     assert(file);
     file->path = strdup(path);
     assert(file->path);
     file->percent = percent;
+    file->data = data_path;
 
-    file->data = addSuffix(path, ".dat");
-    assert(file->data);
-    if (!isFile(file->data)) {
-        P_ERROR("Cannot find index file \"%s\"", file->data);
-        freeFileList(file);
-        return NULL;
-    }
     FortuneHeader* header = &file->header;
     FILE* fin = NULL;
     if (!(fin = fopen(file->data, "r")) ||
