@@ -1,3 +1,10 @@
+2018-11-20: Version 2.2.0
+
+Fix buffering for text rotation. If your original data contains non-ASCII
+characters and was rotated, please use the old version of fortune to convert
+the rotated data back to the original before you update the data.
+
+
 2018-04-10: Version 2.1.0
 
 Ignore source files without corresponding index files.
