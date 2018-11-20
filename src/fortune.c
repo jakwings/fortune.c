@@ -152,7 +152,10 @@ char* _(GetCookieFromFd)(int in, int idx, FortuneIndex index,
         return NULL;
     }
 
-    if (cookie && rotated) _(Rotate)(cookie, length);
+    if (cookie && rotated && _(Rotate)(cookie, length) != length) {
+        P_ERROR("%s", "Failed to become a good program");
+        return NULL;
+    }
     return cookie;
 }
 

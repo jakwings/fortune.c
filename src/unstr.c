@@ -78,7 +78,9 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
         size_t line_length = 0;
         bool in_comment = false;
         ssize_t nbyte = 0;
-        while ((nbyte = fdgets(in, buf, BUF_SIZE)) > 0) {
+        size_t noffset = 0;
+        while ((/* EOF */ nbyte == 0 && noffset > 0) ||
+                (nbyte = fdgets(in, buf + noffset, BUF_SIZE - noffset)) > 0) {
             length += nbyte;
             line_length += nbyte;
             if (line_length <= BUF_SIZE /* near the previous newline */ &&
@@ -96,9 +98,21 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
                 if (no_comment) continue;
                 if (length <= BUF_SIZE) buf[0] = buf[1] = delim2[0];
             }
-            if (buf[nbyte-1] == '\n') line_length = 0;
-            if (no_rotate) _(Rotate)(buf, nbyte);
-            if (write(out, buf, nbyte) != nbyte) return false;
+            if (buf[nbyte-1] == '\n') {
+                line_length = 0;
+            }
+
+            size_t ntotal = noffset + nbyte;
+            size_t processed = ntotal;
+            if (no_rotate && (processed = _(Rotate)(buf, ntotal)) == 0) {
+                return false;
+            }
+            if (write(out, buf, processed) != processed) {
+                return false;
+            }
+            if ((noffset = ntotal - processed)) {
+                memmove(buf, buf + processed, noffset);
+            }
         }
         if (nbyte == -1) return false;
     }

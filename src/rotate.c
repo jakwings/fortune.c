@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "rotate.h"
 #include "utils.h"
 
@@ -22,31 +23,43 @@
      S1(0x80, 0xBF, (p)[2]) && \
      S1(0x80, 0xBF, (p)[3]))
 
-static int skip(unsigned char* p, int m, int n);
+static size_t skip(unsigned char* p, size_t n);
 static unsigned char rotate(size_t s, size_t e, unsigned char c);
+static size_t utf8_valid_length(unsigned char c);
 
 bool _(RotateData)(int argc, char** argv)
 {
     char buf[4096];
     size_t nbyte = 0;
-    while ((nbyte = fread(buf, 1, sizeof(buf), stdin))) {
+    size_t offset = 0;
+    while ((/* EOF */ nbyte == 0 && offset > 0) ||
+            (nbyte = fread(buf + offset, 1, sizeof(buf) - offset, stdin))) {
         if (ferror(stdin)) {
             P_ERROR("%s", "Failed to read from stdin");
             return false;
         }
-        if (fwrite(_(Rotate)(buf, nbyte), 1, nbyte, stdout) != nbyte) {
+        size_t total = offset + nbyte;
+        size_t processed = _(Rotate)(buf, total);
+        if (processed < 1 || processed > total) {
+            P_ERROR("%s", "Failed to become a good program");
+            return false;
+        }
+        if (fwrite(buf, 1, processed, stdout) != processed) {
             P_ERROR("%s", "Failed to write to stdout");
             return false;
+        }
+        if ((offset = total - processed)) {
+            memmove(buf, buf + processed, offset);
         }
     }
     return true;
 }
 
-static int skip(unsigned char* p, int m, int n)
+static size_t skip(unsigned char* p, size_t n)
 {
     /* U+80-A0 */
-    if (m + 1 < n && 0xC2 == p[0] && S1(0x80, 0xA0, p[1])) return 1;
-    if (m + 2 < n &&
+    if (n == 2 && 0xC2 == p[0] && S1(0x80, 0xA0, p[1])) return 1;
+    if (n == 3 &&
              /* U+180B-180F */
             ((0xE1 == p[0] && 0xA0 == p[1] && S1(0x8B, 0x8F, p[2])) ||
              /* U+2000-200F */
@@ -75,7 +88,7 @@ static int skip(unsigned char* p, int m, int n)
              (0xEF == p[0] && 0xBF == p[1] && S1(0xB0, 0xBF, p[2])))) {
         return 2;
     }
-    if (m + 3 < n &&
+    if (n == 4 &&
              /* U+01BC9D */
             ((0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] && 0x9D == p[3]) ||
              /* U+01BCA0-01BCAF */
@@ -106,7 +119,16 @@ static unsigned char rotate(size_t s, size_t e, unsigned char c)
     return c;
 }
 
-char* _(Rotate)(char* s, size_t n)
+static size_t utf8_valid_length(unsigned char c)
+{
+    static const uint8_t lengths[] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0,
+    };
+    return lengths[c >> 3];
+}
+
+size_t _(Rotate)(char* s, size_t n)
 {
     for (size_t i = 0; i < n; i++) {
         char c = s[i];
@@ -115,19 +137,31 @@ char* _(Rotate)(char* s, size_t n)
         } else if (S1('a', 'z', c)) {
             s[i] = rotate('a', 'z', c);
         } else if (!S1(0x00, 0x7F, c)) {
+            size_t len = utf8_valid_length(c);
+            /* The buffer is not big enough. */
+            if (len > n - i) {
+                return i;
+            }
+            /* Do not care for invalid byte sequences in input nor output. */
+            if (len == 0) {
+                continue;
+            }
+
             unsigned char* p = (void*)(s + i);
 
             size_t k = 0;
-            if ((k = skip(p, i, n))) {
+            if ((k = skip(p, len))) {
                 i += k;
                 continue;
             }
             /* Complement for S_SKIP */
-            if (i + 1 < n && 0xC2 == p[0] && S1(0xA1, 0xBF, p[1])) {
-                p[1] = rotate(0xA1, 0xBF, p[1]);  /* odd */
-                i += 1; continue;
+            if (len == 2) {
+                if (0xC2 == p[0] && S1(0xA1, 0xBF, p[1])) {
+                    p[1] = rotate(0xA1, 0xBF, p[1]);  /* odd */
+                    i += 1; continue;
+                }
             }
-            if (i + 2 < n) {
+            if (len == 3) {
                 if (0xE1 == p[0] && 0xA0 == p[1] && S1(0x80, 0x8A, p[2])) {
                     p[2] = rotate(0x80, 0x8A, p[2]);  /* odd */
                     i += 2; continue;
@@ -185,7 +219,7 @@ char* _(Rotate)(char* s, size_t n)
                     i += 2; continue;
                 }
             }
-            if (i + 3 < n) {
+            if (len == 4) {
                 if (0xF0 == p[0] && 0x9B == p[1] && 0xB2 == p[2] &&
                         S1(0x80, 0x9C, p[3])) {
                     p[3] = rotate(0x80, 0x9C, p[3]);  /* odd */
@@ -203,22 +237,21 @@ char* _(Rotate)(char* s, size_t n)
                 }
             }
 
-            /* Do not care for invalid byte sequences in input nor output. */
-            if (i + 1 < n && S2(0xC0, 0xDF, p)) {
+            if (len == 2 && S2(0xC0, 0xDF, p)) {
                 p[1] = rotate(0x80, 0xBF, p[1]);  /* even */
                 i += 1; continue;
             }
-            if (i + 2 < n && S3(0xE0, 0xEF, p)) {
+            if (len == 3 && S3(0xE0, 0xEF, p)) {
                 p[2] = rotate(0x80, 0xBF, p[2]);  /* even */
                 i += 2; continue;
             }
-            if (i + 3 < n && S4(0xF0, 0xF7, p)) {
+            if (len == 4 && S4(0xF0, 0xF7, p)) {
                 p[3] = rotate(0x80, 0xBF, p[3]);  /* even */
                 i += 3; continue;
             }
         }
     }
-    return s;
+    return n;
 }
 
 #ifndef FORTUNE_MAKE_LIB

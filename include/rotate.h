@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define _(cookie) fortune ## cookie
-char* _(Rotate)(char* s, size_t n);
+size_t _(Rotate)(char* s, size_t n);
 bool _(RotateData)(int argc, char** argv);
 #undef _
 
