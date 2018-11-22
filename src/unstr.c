@@ -104,8 +104,8 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
 
             size_t ntotal = noffset + nbyte;
             size_t processed = ntotal;
-            if (no_rotate && (processed = _(Rotate)(buf, ntotal)) < 1) {
-               if (nbyte != 0 && noffset > 0) return false;
+            if (no_rotate && nbyte > 0) {
+               processed = _(Rotate)(buf, ntotal);
             }
             if (write(out, buf, processed) != processed) {
                 return false;
@@ -114,6 +114,7 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
                 memmove(buf, buf + processed, noffset);
             }
         }
+        if (noffset > 0) return false;
         if (nbyte == -1) return false;
     }
     if (offset == -1) return false;

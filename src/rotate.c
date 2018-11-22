@@ -39,11 +39,7 @@ bool _(RotateData)(int argc, char** argv)
             return false;
         }
         size_t total = offset + nbyte;
-        size_t processed = _(Rotate)(buf, total);
-        if (nbyte != 0 && offset > 0 && processed < 1) {
-            L_ERROR("%s", "Failed to become a good program");
-            return false;
-        }
+        size_t processed = (nbyte > 0) ? _(Rotate)(buf, total) : total;
         if (fwrite(buf, 1, processed, stdout) != processed) {
             P_ERROR("%s", "Failed to write to stdout");
             return false;
@@ -51,6 +47,14 @@ bool _(RotateData)(int argc, char** argv)
         if ((offset = total - processed)) {
             memmove(buf, buf + processed, offset);
         }
+    }
+    if (ferror(stdin)) {
+        P_ERROR("%s", "Failed to read from stdin");
+        return false;
+    }
+    if (offset > 0) {
+        L_ERROR("%s", "Failed to become a good program");
+        return false;
     }
     return true;
 }
