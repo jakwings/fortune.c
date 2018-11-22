@@ -237,6 +237,7 @@ size_t _(Rotate)(char* s, size_t n)
                 }
             }
 
+            /* Do not care about invalid byte sequences in input nor output. */
             if (len == 2 && S2(0xC0, 0xDF, p)) {
                 p[1] = rotate(0x80, 0xBF, p[1]);  /* even */
                 i += 1; continue;
@@ -249,6 +250,7 @@ size_t _(Rotate)(char* s, size_t n)
                 p[3] = rotate(0x80, 0xBF, p[3]);  /* even */
                 i += 3; continue;
             }
+            /* Only invalid input can make overlarge Unicode code points. */
         }
     }
     return n;
