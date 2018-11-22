@@ -1,3 +1,8 @@
+2018-11-22: Version 2.2.3
+
+Fix checks for malformed input (never again).
+
+
 2018-11-22: Version 2.2.2
 
 Fix checks for malformed input (again).
