@@ -104,7 +104,8 @@ bool _(DumpDataFromFd)(int in, int idx, int out, FortuneHeader* header)
 
             size_t ntotal = noffset + nbyte;
             size_t processed = ntotal;
-            if (no_rotate && (processed = _(Rotate)(buf, ntotal)) == 0) {
+            if (no_rotate &&
+                    ((processed = _(Rotate)(buf, ntotal)) < 1 && nbyte != 0)) {
                 return false;
             }
             if (write(out, buf, processed) != processed) {
