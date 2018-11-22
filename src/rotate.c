@@ -40,7 +40,7 @@ bool _(RotateData)(int argc, char** argv)
         }
         size_t total = offset + nbyte;
         size_t processed = _(Rotate)(buf, total);
-        if (nbyte != 0 && processed < 1) {
+        if (nbyte != 0 && offset > 0 && processed < 1) {
             L_ERROR("%s", "Failed to become a good program");
             return false;
         }
