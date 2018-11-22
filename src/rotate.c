@@ -41,7 +41,7 @@ bool _(RotateData)(int argc, char** argv)
         size_t total = offset + nbyte;
         size_t processed = _(Rotate)(buf, total);
         if (processed < 1 || processed > total) {
-            P_ERROR("%s", "Failed to become a good program");
+            L_ERROR("%s", "Failed to become a good program");
             return false;
         }
         if (fwrite(buf, 1, processed, stdout) != processed) {
