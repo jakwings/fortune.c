@@ -1,3 +1,8 @@
+2018-11-22: Version 2.2.1
+
+Fix checks for malformed input.
+
+
 2018-11-20: Version 2.2.0
 
 Fix buffering for text rotation. If your original data contains non-ASCII
